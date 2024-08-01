@@ -24,8 +24,14 @@ app.get("/products", async (req, res) => {
 
   console.log(query1);
   try {
+
     const query = `
       query {
+      shop{
+        currencyformats {
+         moneyFormat
+        }
+      }
         products(query:"${query1}",first: 1) {
           edges {
             node {
