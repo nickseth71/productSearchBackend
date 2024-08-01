@@ -15,11 +15,11 @@ const headers = {
   "X-Shopify-Access-Token": accessToken,
 };
 
-app.get("/",(req,res)=>{
+app.get("api/",(req,res)=>{
   return res.json({data:"hi this is response from serverside."})
 })
 
-app.get("/products", async (req, res) => {
+app.get("api/products", async (req, res) => {
   const query1 = req.query.query;
 
   console.log(query1);
