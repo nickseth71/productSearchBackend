@@ -27,11 +27,6 @@ app.get("/products", async (req, res) => {
 
     const query = `
       query {
-      shop{
-        currencyformats {
-         moneyFormat
-        }
-      }
         products(query:"${query1}",first: 1) {
           edges {
             node {
@@ -45,6 +40,7 @@ app.get("/products", async (req, res) => {
                     price
                     title
                     displayName
+             
                   }
                 }
               }
@@ -54,10 +50,18 @@ app.get("/products", async (req, res) => {
             hasNextPage
           }
         }
+    shop {
+    name
+    currencyCode
+   currencyFormats {
+      moneyFormat
+    }
+  }
       }
     `;
     const data = { query };
     const response = await axios.post(url, data, { headers });
+  
     const products = response.data.data.products.edges.map((edge) => ({
       ...edge.node,
       variants: {
@@ -66,7 +70,7 @@ app.get("/products", async (req, res) => {
         ),
       },
     }));
-    return res.json({ products });
+    return res.json({ products,shop:response.data.data.shop });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Error fetching products" });
