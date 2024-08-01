@@ -1,33 +1,38 @@
-import express from "express";
-import axios from "axios";
-import cors from "cors";
+// Import libraries
+import express from "express"; 
+import axios from "axios"; 
+import cors from "cors"; 
 
-const app = express();
-app.use(cors());
-app.use(express.json());
+const app = express(); // Initialize an Express application
+app.use(cors()); //Enable CORS for all routes
+app.use(express.json()); //Enable parsing of JSON payloads 
 
-const shop = "anatta-test-store";
-const accessToken = "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";
+const shop = "anatta-test-store"; // Shopify store name
+const accessToken = "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"; //Shopify API access token
 
+// Shopify GraphQL API URL
 const url = `https://${shop}.myshopify.com/admin/api/2024-07/graphql.json`;
+
+// Headers for the Shopify API request
 const headers = {
   "Content-Type": "application/json",
   "X-Shopify-Access-Token": accessToken,
 };
 
-app.get("/",(req,res)=>{
-  return res.json({data:"hi this is response from serverside."})
-})
+// Root route 
+app.get("/", (req, res) => {
+  return res.json({ data: "Hi, this is a response from the server." });
+});
 
+// Route to fetch products from Shopify
 app.get("/products", async (req, res) => {
-  const query1 = req.query.query;
+  const query1 = req.query.query; //Get the query parameter from the request
 
-  console.log(query1);
   try {
-
+    // GraphQL query
     const query = `
       query {
-        products(query:"${query1}",first: 1) {
+        products(query: "${query1}", first: 1) {
           edges {
             node {
               id
@@ -40,7 +45,6 @@ app.get("/products", async (req, res) => {
                     price
                     title
                     displayName
-             
                   }
                 }
               }
@@ -50,18 +54,19 @@ app.get("/products", async (req, res) => {
             hasNextPage
           }
         }
-    shop {
-    name
-    currencyCode
-   currencyFormats {
-      moneyFormat
-    }
-  }
+        shop {
+          name
+          currencyCode
+          currencyFormats {
+            moneyFormat
+          }
+        }
       }
     `;
-    const data = { query };
-    const response = await axios.post(url, data, { headers });
+    const data = { query }; //Payload for the Axios POST request
+    const response = await axios.post(url, data, { headers }); // Make the request to Shopify's GraphQL API
   
+    // Extract and sort the products by price
     const products = response.data.data.products.edges.map((edge) => ({
       ...edge.node,
       variants: {
@@ -70,14 +75,15 @@ app.get("/products", async (req, res) => {
         ),
       },
     }));
-    return res.json({ products,shop:response.data.data.shop });
+
+    // Respond with the products and shop details
+    return res.json({ products, shop: response.data.data.shop });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Error fetching products" });
+    res.status(500).json({ message: "Error fetching products" }); 
   }
 });
 
-const port = 3010;
+const port = 3010; //Define the port the server will listen on
 app.listen(port, () => {
-  console.log(`Server listening on port ${port}`);
+  console.log(`Server listening on port ${port}`); 
 });
